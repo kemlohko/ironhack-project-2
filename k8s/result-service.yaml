@@ -4,7 +4,8 @@ metadata:
   name: result-service
   namespace: ironhack-project-2
 spec:
-  type: LoadBalancer
+  # ClusterIP because we now use Ingress
+  # type: LoadBalancer
   selector:
     app: result-app
   ports:

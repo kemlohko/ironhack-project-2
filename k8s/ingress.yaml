@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: voting-app-ingress
+  namespace: ironhack-project-2
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+sepc:
+  rules:
+    - http:
+      paths:
+        - path: /vote
+          pathType: Prefix
+          backend:
+            service:
+              name: vote-service
+              port:
+                number: 8080
+        - path: /result
+          pathType: Prefix
+          backend: 
+            service: 
+            name: result-service
+            port:
+              number: 8081
