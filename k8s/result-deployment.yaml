@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: result-deployment
+  namespace: ironhack-project-2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: result-app
+  template:
+    metadata:
+      labels:
+        app: result-app
+    spec:
+       containers:
+         - name: result-container
+           image: akemloh/result
+           env:
+            - name: PG_HOST
+              value: "postgres-postgresql-read"
+            - name: PG_PORT
+              value: "5432"
+            - name: PG_USER
+              value: "postgres"
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: postgres-password
+            - name: PG_DATABASE
+              value: "voting"
+           ports:
+            - containerPort: 80
+    
