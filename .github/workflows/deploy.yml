@@ -61,7 +61,7 @@ jobs:
         uses: azure/setup-kubectl@v4
 
       - name: Update Kubeconfig
-        run: eksctl utils write-kubeconfig --cluster ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ EKS_CLUSTER_REGION }}
+        run: eksctl utils write-kubeconfig --cluster ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.EKS_CLUSTER_REGION }}
 
       - name: Apply Kubernetes Manifests
         run: kubectl apply -f k8s/
