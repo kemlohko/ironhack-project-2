@@ -5,7 +5,41 @@ on:
     branches: ["main"]
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build && push vote
+        run: |
+          cd vote
+          docker build -t akemloh/vote:${{ github.sha }} -t akemloh/vote:latest .
+          docker push akemloh/vote:${{ github.sha }}
+          docker push akemloh/vote:latest
+
+      - name: Build && push result
+        run: |
+          cd result
+          docker build -t akemloh/result:${{ github.sha }} -t akemloh/result:latest .
+          docker push akemloh/result:${{ github.sha }}
+          docker push akemloh/result:latest
+
+      - name: Build && push worker
+        run: |
+          cd worker
+          docker build -t akemloh/worker:${{ github.sha }} -t akemloh/worker:latest .
+          docker push akemloh/worker:${{ github.sha }}
+          docker push akemloh/worker:latest
+
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -17,14 +51,26 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-  
+
       - name: Install eksctl
         run: |
           curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
           sudo mv /tmp/eksctl /usr/local/bin
-      
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
       - name: Update Kubeconfig
-        run: eksctl utils write-kubeconfig --cluster eks-alex-2 --region us-east-1
-      
+        run: eksctl utils write-kubeconfig --cluster ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ EKS_CLUSTER_REGION }}
+
       - name: Apply Kubernetes Manifests
         run: kubectl apply -f k8s/
+
+      - name: Roll deployments to pick up new images
+        run: |
+          kubectl rollout restart deployment/vote-deployment -n ironhack-project-2
+          kubectl rollout restart deployment/worker-deployment -n ironhack-project-2
+          kubectl rollout restart deployment/result-deployment -n ironhack-project-2
+          kubectl rollout status deployment/vote-deployment -n ironhack-project-2 --timeout=120s
+          kubectl rollout status deployment/worker-deployment -n ironhack-project-2 --timeout=120s
+          kubectl rollout status deployment/result-deployment -n ironhack-project-2 --timeout=120s
