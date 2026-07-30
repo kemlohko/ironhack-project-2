@@ -25,7 +25,7 @@ helm upgrade --install external-dns external-dns/external-dns \
   --set "domainFilters[0]=ironlabs.online" \
   --set policy=sync \
   --set registry=txt \
-  --set txtOwnerId="${HOSTED_ZONE_ID}" \
+  --set txtOwnerId=eks-alex\
   --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"="${EXTDNS_ROLE_ARN}" \
   --wait --timeout=5m
 

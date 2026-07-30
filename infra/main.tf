@@ -47,4 +47,19 @@ module "eks" {
       desired_size   = var.desired_nodes
     }
   }
+
+  # Allow all traffic between nodes (needed for pod-to-pod traffic across
+  # nodes on ports below the ephemeral range, e.g. apps on port 80).
+  # The module's "recommended" rules only open 1025-65535 node-to-node,
+  # which breaks cross-node routing to low-numbered container ports.
+  node_security_group_additional_rules = {
+    ingress_self_all = {
+      description = "Node to node all ports/protocols"
+      protocol    = "-1"
+      from_port   = 0
+      to_port     = 0
+      type        = "ingress"
+      self        = true
+    }
+  }
 }

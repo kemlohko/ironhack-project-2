@@ -4,22 +4,32 @@ metadata:
   name: voting-app-ingress
   namespace: ironhack-project-2
   annotations:
-    kubernetes.io/ingress.class: "nginx"
-sepc:
+    # Create Route 53 A records for the hostnames pointing at the Ingress Controller's ELB
+    # The external dns is already auto-detects hostnames straight from the spec.rules[].host
+    # The annptation is here just for consilidation
+    external-dns.alpha.kubernetes.io/hostname: vote.alex.ironlabs.online,result.alex.ironlabs.online
+    
+spec:
+  ingressClassName: nginx
   rules:
-    - http:
-      paths:
-        - path: /vote
-          pathType: Prefix
-          backend:
-            service:
-              name: vote-service
-              port:
-                number: 8080
-        - path: /result
-          pathType: Prefix
-          backend: 
-            service: 
-            name: result-service
-            port:
-              number: 8081
+    - host: vote.alex.ironlabs.online      
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vote-service
+                port:
+                  number: 80
+        
+    - host: result.alex.ironlabs.online 
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: 
+              service: 
+                name: result-service
+                port:
+                  number: 80
