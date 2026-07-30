@@ -8,6 +8,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -24,4 +27,4 @@ jobs:
         run: eksctl utils write-kubeconfig --cluster eks-alex-2 --region us-east-1
       
       - name: Apply Kubernetes Manifests
-        run: kubectl apply -f ./k8s/
+        run: kubectl apply -f k8s/
