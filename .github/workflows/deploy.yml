@@ -62,15 +62,18 @@ jobs:
 
       - name: Update Kubeconfig
         run: eksctl utils write-kubeconfig --cluster ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.EKS_CLUSTER_REGION }}
+      
+      - name: Update image tag in manifest
+        run: |
+          sed -i "s|image: akemloh/vote:.*|image: akemloh/vote:${{ github.sha }}|" k8s/vote-deployment.yaml
+          sed -i "s|image: akemloh/worker:.*|image: akemloh/worker:${{ github.sha }}|" k8s/worker-deployment.yaml
+          sed -i "s|image: akemloh/result:.*|image: akemloh/result:${{ github.sha }}|" k8s/result-deployment.yaml
 
       - name: Apply Kubernetes Manifests
         run: kubectl apply -f k8s/
 
-      - name: Roll deployments to pick up new images
+      - name: Wait for rollout
         run: |
-          kubectl rollout restart deployment/vote-deployment -n ironhack-project-2
-          kubectl rollout restart deployment/worker-deployment -n ironhack-project-2
-          kubectl rollout restart deployment/result-deployment -n ironhack-project-2
           kubectl rollout status deployment/vote-deployment -n ironhack-project-2 --timeout=120s
           kubectl rollout status deployment/worker-deployment -n ironhack-project-2 --timeout=120s
           kubectl rollout status deployment/result-deployment -n ironhack-project-2 --timeout=120s
