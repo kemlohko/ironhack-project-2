@@ -6,10 +6,10 @@ You just need a working AWS account (with your AWS CLI already set up).
 ```bash
 cd infra
 chmod +x up.sh down.sh
-./up.sh
+./up.sh <your-name> 
 ```
 
 2. When you're done, turn it off!
 ```bash
-./down.sh
+./down.sh <your-name> 
 ```
